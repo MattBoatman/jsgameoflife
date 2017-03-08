@@ -1,8 +1,16 @@
+'use strict'
+const args = process.argv;
+let count;
+let rows = args[2] ? args[2] : 6;
+let columns = args[3] ? args[3] : 8;
+let originalState;
+
+
 Array.matrix = function(numrows, numcols) {
-    var arr = [];
-    for (var i = 0; i < numrows; ++i) {
-        var columns = [];
-        for (var j = 0; j < numcols; ++j) {
+    let arr = [];
+    for (let i = 0; i < numrows; ++i) {
+        let columns = [];
+        for (let j = 0; j < numcols; ++j) {
             columns[j] = getRandom();
         }
         arr[i] = columns;
@@ -16,87 +24,92 @@ function getRandom() {
 
 
 
-(function foo(){ 
-    var start = Array.matrix(6,8);
-    var count;
 
-    console.log(start); 
+originalState = Array.matrix(rows,columns);
+console.log(originalState); 
 
-    _getNeighbors(2,2);
-
-    function _getNeighbors(r,c){
-        count = 0;
-        _getBottomRow(r,c);
-        _getTopRow(r,c);
-        _getSides(r,c);
-
-    //     console.log('bottom',_getBottomRow(r,c));
-    //    console.log('top', _getTopRow(r,c));
-    //    console.log('sides', _getSides(r,c));
-       console.log(count);
-    }
-
+let neighborFunctions = [
     function _getTopRow(r,c) {
-        var topIndex = r - 1;
-        var startIndex = c === 0 ? 0 : c-1;
-        var endIndex = c === 8 ? 8 : c+1; 
+        let topIndex = r - 1;
+        let startIndex = c === 0 ? 0 : c-1;
+        let endIndex = c === columns ? columns : c+1; 
 
         if(topIndex === -1){
             return;
         }
-        // console.log('top row')
-        for(startIndex; startIndex <= endIndex; startIndex++) {
-            // console.log(start[topIndex][startIndex]);
-            // if(start[topIndex][startIndex] === 1){
-            //     count++;
-            // }
+        for(startIndex; startIndex < endIndex; startIndex++) {
             neighborCount(topIndex, startIndex);
         }
-        // return count;
-    }
+    },
+    function getBottomRow(r,c) {
+        let bottomIndex = r + 1;
+        let startIndex = c === 0 ? 0 : c-1;
+        let endIndex = c === columns ? columns : c+1;
 
-    function _getBottomRow(r,c) {
-        var bottomIndex = r + 1;
-        var startIndex = c === 0 ? 0 : c-1;
-        var endIndex = c === 8 ? 8 : c+1; //fix this when asking user for input
-
-        if(bottomIndex === 9){
+        if(bottomIndex === originalState.length){
             return;
         }
-        // console.log('bottom row')
-        for(startIndex; startIndex <= endIndex; startIndex++) {
-            // console.log(start[bottomIndex][startIndex]);
-            // if(start[bottomIndex][startIndex] === 1){
-            //     count++;
-            // }
+        for(startIndex; startIndex < endIndex; startIndex++) {
             neighborCount(bottomIndex,startIndex);
         }
-        // return count;
-    }
-
-    function _getSides(r,c) {
-        // var bottomIndex = r + 1;
+    },
+    function getSides(r,c) {
         var leftIndex = c === 0 ? false : c-1;
         var rightIndex = c === 8 ? false : c+1; 
         if(leftIndex) {
             neighborCount(r,leftIndex);
-            // if(start[r][leftIndex] === 1){
-            //     count++;
-            // }
         }
         if(rightIndex) {
             neighborCount(r,rightIndex);
-            // if(start[r][rightIndex] === 1){
-            //     count++;
-            // }
-        }
-        // return count;
-    }
-
-    function neighborCount(r, c) {
-        if(start[r][c] === 1){
-            count++;
         }
     }
+];
 
-})();
+function rulesForLiveCells(liveNeighbors){
+    if( 2 === liveNeighbors || liveNeighbors === 3){
+        return 1;
+    } else {
+        return 0;
+    }
+}   
+
+function rulesForDeadCells(liveNeighbors) {
+    if(liveNeighbors === 3) {
+        return 1;
+    } else {
+        return 0;
+    }
+}
+
+function neighborCount(r, c) {
+    if(originalState[r][c] === 1){
+        count++;
+    }
+}
+
+
+function getNeighbors(r,c){
+    count = 0;
+    neighborFunctions.forEach(function(func){func(r,c)});
+    return count;
+}
+
+function gamePlay() {
+    let liveNeighborsForCurrentCell;
+    let newGrid = [];
+
+    for(let i = 0; i <= originalState.length - 1; i++) {
+       let newRow = originalState[i].map(function(x, index){
+            liveNeighborsForCurrentCell = getNeighbors(i, index);
+            if(x) {
+                return rulesForLiveCells(liveNeighborsForCurrentCell);
+            } else {
+                return rulesForDeadCells(liveNeighborsForCurrentCell);
+            } 
+        });
+        newGrid.push(newRow);
+    }
+    console.log(newGrid)
+}
+
+gamePlay();
