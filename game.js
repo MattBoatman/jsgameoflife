@@ -12,8 +12,10 @@ if (process.argv.length > 2) {
     let parsedColumns = parseInt(args[3]);
     rows = parsedRows ? parsedRows : 6;
     columns = parsedColumns ? parsedColumns : 8;
-    repeat = args[4] ? true : false;
-    playUntilDead = args[5] ? true : false;
+    console.log(args[4])
+    console.log(typeof args[4])
+    repeat = (args[4] == 'true');
+    playUntilDead = (args[5] == 'true');
     if(!playUntilDead && repeat) {
         let parsedIterations = parseInt(args[6]);
         iterations = parsedIterations ? parsedIterations : false;
