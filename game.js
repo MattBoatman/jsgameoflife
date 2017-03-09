@@ -1,10 +1,24 @@
 'use strict'
 const args = process.argv;
-let rows = args[2] ? args[2] : 6; //check if int
-let columns = args[3] ? args[3] : 8;
-let repeat = args[4] ? true : false;
-// let count; 
-let originalState;
+let rows = 6; //check if int
+let columns = 8;
+let repeat = false;
+let iterations;
+let playUntilDead = false;
+// let originalState;
+
+if (process.argv.length > 2) {
+    let parsedRows = parseInt(args[2]);
+    let parsedColumns = parseInt(args[3]);
+    rows = parsedRows ? parsedRows : 6;
+    columns = parsedColumns ? parsedColumns : 8;
+    repeat = args[4] ? true : false;
+    playUntilDead = args[5] ? true : false;
+    if(!playUntilDead && repeat) {
+        let parsedIterations = parseInt(args[6]);
+        iterations = parsedIterations ? parsedIterations : false;
+    }
+}
 
 //Crockfords
 Array.matrix = (numrows, numcols) => {
@@ -19,33 +33,13 @@ Array.matrix = (numrows, numcols) => {
     return arr;
 };
 
-function getRandom() {
+let getRandom = () => {
   return Math.round(Math.random());
 }
 
-
-
-
-// originalState = Array.matrix(rows,columns);
-originalState = [ [ 1, 0, 0, 0, 0, 0, 1, 1 ],
-  [ 1, 1, 0, 1, 0, 0, 1, 0 ],
-  [ 1, 1, 0, 1, 1, 0, 0, 0 ],
-  [ 1, 1, 0, 1, 1, 1, 0, 0 ],
-  [ 0, 0, 1, 0, 1, 0, 1, 0 ],
-  [ 1, 1, 0, 0, 0, 1, 1, 0 ] ]
-// let expectedOut = 
-// [ [ 1, 1, 0, 0, 0, 0, 1, 1 ],
-//   [ 0, 0, 0, 1, 1, 1, 1, 1 ],
-//   [ 0, 0, 0, 0, 0, 0, 0, 0 ],
-//   [ 1, 0, 0, 0, 0, 0, 0, 0 ],
-//   [ 0, 0, 1, 0, 0, 0, 1, 0 ],
-//   [ 0, 1, 0, 0, 0, 1, 1, 0 ] ]
-console.log(originalState); 
-console.log('\n'); 
-
 let neighborFunctions = {
     count: 0,
-     getTopRow(r,c) {
+     getTopRow(r, c, originalState) {
         let topIndex = r - 1;
         let startIndex = c === 0 ? 0 : c-1;
         let endIndex = c === columns -1 ? columns-1 : c+1; 
@@ -54,30 +48,30 @@ let neighborFunctions = {
             return;
         }
         for(startIndex; startIndex <= endIndex; startIndex++) {
-            this.count += +neighborCount(topIndex, startIndex);
+            this.count += +neighborCount(topIndex, startIndex, originalState);
         }
     },
-    getBottomRow(r,c) {
+    getBottomRow(r, c, originalState) {
         let bottomIndex = r + 1;
         let startIndex = c === 0 ? 0 : c-1;
         let endIndex = c === columns-1 ? columns-1 : c+1;
 
-        if(bottomIndex === originalState.length){
+        if(bottomIndex === rows){
             return;
         }
         for(startIndex; startIndex <= endIndex; startIndex++) {
-            this.count += +neighborCount(bottomIndex,startIndex);
+            this.count += +neighborCount(bottomIndex, startIndex, originalState);
         }
     },
-     getSides(r,c) {
+     getSides(r, c, originalState) {
         var leftIndex = c === 0 ? 'skip' : c-1; 
         var rightIndex = c === columns-1 ? 'skip' : c+1; 
         
         if(leftIndex !== 'skip') {
-            this.count += +neighborCount(r,leftIndex);
+            this.count += +neighborCount(r, leftIndex, originalState);
         }
         if(rightIndex !== 'skip') {
-            this.count += +neighborCount(r,rightIndex);
+            this.count += +neighborCount(r, rightIndex, originalState);
         }
     }
 };
@@ -92,38 +86,84 @@ let rules = {
 }
 
 
-let neighborCount = (r, c) => {
+let neighborCount = (r, c, originalState) => {
     return originalState[r][c];
 }
 
 
-let getNeighbors = (r,c) => {
+let getNeighbors = (r, c, originalState) => {
     neighborFunctions.count = 0;
     for (var obj in neighborFunctions) {
         if (typeof neighborFunctions[obj] == "function") {
-            neighborFunctions[obj](r,c);
+            neighborFunctions[obj](r, c, originalState);
         }
     }
     return neighborFunctions.count;
 }
 
-function gamePlay() {
+function gamePlay(originalState) {
     let liveNeighborsForCurrentCell;
-    
+    let deadYet = 0;
+    let newCell;
     let newGrid = [];
 
+    console.log(originalState); 
+    console.log('\n'); 
+    
     for(let i = 0; i <= originalState.length - 1; i++) {
        let newRow = originalState[i].map((x, index)=>{
-            liveNeighborsForCurrentCell = getNeighbors(i, index);
+            liveNeighborsForCurrentCell = getNeighbors(i, index, originalState);
             if(x) {
-                return +rules.rulesForLiveCells(liveNeighborsForCurrentCell);
+                newCell = +rules.rulesForLiveCells(liveNeighborsForCurrentCell);
+                if(newCell) {
+                    deadYet++;
+                }
+                return newCell;
             } else {
-                return +rules.rulesForDeadCells(liveNeighborsForCurrentCell);
+                newCell = +rules.rulesForDeadCells(liveNeighborsForCurrentCell)
+                if(newCell) {
+                    deadYet++;
+                }
+                return newCell;
             } 
         });
         newGrid.push(newRow);
     }
+
     console.log(newGrid)
+    console.log('\n'); 
+
+    if(deadYet === 0){
+        repeat = false;
+    }
+    return newGrid;
+}
+    let originalState = Array.matrix(rows,columns);
+//    let originalState = [ [ 1, 0, 0, 0, 0, 0, 1, 1 ],
+//   [ 1, 1, 0, 1, 0, 0, 1, 0 ],
+//   [ 1, 1, 0, 1, 1, 0, 0, 0 ],
+//   [ 1, 1, 0, 1, 1, 1, 0, 0 ],
+//   [ 0, 0, 1, 0, 1, 0, 1, 0 ],
+//   [ 1, 1, 0, 0, 0, 1, 1, 0 ] ]
+// let expectedOut = 
+// [ [ 1, 1, 0, 0, 0, 0, 1, 1 ],
+//   [ 0, 0, 0, 1, 1, 1, 1, 1 ],
+//   [ 0, 0, 0, 0, 0, 0, 0, 0 ],
+//   [ 1, 0, 0, 0, 0, 0, 0, 0 ],
+//   [ 0, 0, 1, 0, 0, 0, 1, 0 ],
+//   [ 0, 1, 0, 0, 0, 1, 1, 0 ] ]
+
+if(repeat) {
+    if(!iterations || playUntilDead) {
+        while(repeat) {
+            originalState = gamePlay(originalState)
+            gamePlay(originalState);
+        }
+    }
+    for(let x = 0; x < iterations; x++) {
+        originalState = gamePlay(originalState)
+    }
+} else {
+    gamePlay(originalState);
 }
 
-gamePlay();
