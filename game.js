@@ -3,7 +3,7 @@ const args = process.argv;
 let rows = 6; //check if int
 let columns = 8;
 let repeat = false;
-let iterations;
+let iterations = 0;
 let playUntilDead = false;
 // let originalState;
 
@@ -12,8 +12,6 @@ if (process.argv.length > 2) {
     let parsedColumns = parseInt(args[3]);
     rows = parsedRows ? parsedRows : 6;
     columns = parsedColumns ? parsedColumns : 8;
-    console.log(args[4])
-    console.log(typeof args[4])
     repeat = (args[4] == 'true');
     playUntilDead = (args[5] == 'true');
     if(!playUntilDead && repeat) {
@@ -109,8 +107,8 @@ function gamePlay(originalState) {
     let newCell;
     let newGrid = [];
 
-    console.log(originalState); 
-    console.log('\n'); 
+    // console.log(originalState); 
+    
     
     for(let i = 0; i <= originalState.length - 1; i++) {
        let newRow = originalState[i].map((x, index)=>{
@@ -154,7 +152,9 @@ function gamePlay(originalState) {
 //   [ 1, 0, 0, 0, 0, 0, 0, 0 ],
 //   [ 0, 0, 1, 0, 0, 0, 1, 0 ],
 //   [ 0, 1, 0, 0, 0, 1, 1, 0 ] ]
-
+console.log('SEED STATE');
+console.log(originalState);
+console.log('\n'); 
 if(repeat) {
     if(!iterations || playUntilDead) {
         while(repeat) {
