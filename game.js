@@ -2,6 +2,7 @@
 const args = process.argv;
 let rows = args[2] ? args[2] : 6;
 let columns = args[3] ? args[3] : 8;
+let repeat = args[4] ? true : false;
 let count, originalState;
 
 //Crockfords
@@ -24,13 +25,13 @@ function getRandom() {
 
 
 
-// originalState = Array.matrix(rows,columns);
-originalState = [ [ 1, 0, 0, 0, 0, 0, 1, 1 ],
-  [ 1, 1, 0, 1, 0, 0, 1, 0 ],
-  [ 1, 1, 0, 1, 1, 0, 0, 0 ],
-  [ 1, 1, 0, 1, 1, 1, 0, 0 ],
-  [ 0, 0, 1, 0, 1, 0, 1, 0 ],
-  [ 1, 1, 0, 0, 0, 1, 1, 0 ] ]
+originalState = Array.matrix(rows,columns);
+// originalState = [ [ 1, 0, 0, 0, 0, 0, 1, 1 ],
+//   [ 1, 1, 0, 1, 0, 0, 1, 0 ],
+//   [ 1, 1, 0, 1, 1, 0, 0, 0 ],
+//   [ 1, 1, 0, 1, 1, 1, 0, 0 ],
+//   [ 0, 0, 1, 0, 1, 0, 1, 0 ],
+//   [ 1, 1, 0, 0, 0, 1, 1, 0 ] ]
 // let expectedOut = 
 // [ [ 1, 1, 0, 0, 0, 0, 1, 1 ],
 //   [ 0, 0, 0, 1, 1, 1, 1, 1 ],
@@ -81,7 +82,7 @@ let neighborFunctions = {
 
 let rules = {
     rulesForLiveCells: (liveNeighbors) => {
-        return (2 === liveNeighbors || liveNeighbors === 3);
+        return(2 === liveNeighbors || liveNeighbors === 3);
     },   
     rulesForDeadCells: (liveNeighbors) => {
         return liveNeighbors === 3;
@@ -89,14 +90,14 @@ let rules = {
 }
 
 
-function neighborCount(r, c) {
+let neighborCount = (r, c) => {
     if(originalState[r][c] === 1){
         count++;
     }
 }
 
 
-let getNeighbors=(r,c) => {
+let getNeighbors = (r,c) => {
     count = 0;
     for (var obj in neighborFunctions) {
         neighborFunctions[obj](r,c);
