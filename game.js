@@ -1,9 +1,10 @@
 'use strict'
 const args = process.argv;
-let rows = args[2] ? args[2] : 6;
+let rows = args[2] ? args[2] : 6; //check if int
 let columns = args[3] ? args[3] : 8;
 let repeat = args[4] ? true : false;
-let count, originalState;
+// let count; 
+let originalState;
 
 //Crockfords
 Array.matrix = (numrows, numcols) => {
@@ -25,13 +26,13 @@ function getRandom() {
 
 
 
-originalState = Array.matrix(rows,columns);
-// originalState = [ [ 1, 0, 0, 0, 0, 0, 1, 1 ],
-//   [ 1, 1, 0, 1, 0, 0, 1, 0 ],
-//   [ 1, 1, 0, 1, 1, 0, 0, 0 ],
-//   [ 1, 1, 0, 1, 1, 1, 0, 0 ],
-//   [ 0, 0, 1, 0, 1, 0, 1, 0 ],
-//   [ 1, 1, 0, 0, 0, 1, 1, 0 ] ]
+// originalState = Array.matrix(rows,columns);
+originalState = [ [ 1, 0, 0, 0, 0, 0, 1, 1 ],
+  [ 1, 1, 0, 1, 0, 0, 1, 0 ],
+  [ 1, 1, 0, 1, 1, 0, 0, 0 ],
+  [ 1, 1, 0, 1, 1, 1, 0, 0 ],
+  [ 0, 0, 1, 0, 1, 0, 1, 0 ],
+  [ 1, 1, 0, 0, 0, 1, 1, 0 ] ]
 // let expectedOut = 
 // [ [ 1, 1, 0, 0, 0, 0, 1, 1 ],
 //   [ 0, 0, 0, 1, 1, 1, 1, 1 ],
@@ -43,7 +44,8 @@ console.log(originalState);
 console.log('\n'); 
 
 let neighborFunctions = {
-     getTopRow: (r,c) => {
+    count: 0,
+     getTopRow(r,c) {
         let topIndex = r - 1;
         let startIndex = c === 0 ? 0 : c-1;
         let endIndex = c === columns -1 ? columns-1 : c+1; 
@@ -52,10 +54,10 @@ let neighborFunctions = {
             return;
         }
         for(startIndex; startIndex <= endIndex; startIndex++) {
-            neighborCount(topIndex, startIndex);
+            this.count += +neighborCount(topIndex, startIndex);
         }
     },
-    getBottomRow: (r,c) => {
+    getBottomRow(r,c) {
         let bottomIndex = r + 1;
         let startIndex = c === 0 ? 0 : c-1;
         let endIndex = c === columns-1 ? columns-1 : c+1;
@@ -64,18 +66,18 @@ let neighborFunctions = {
             return;
         }
         for(startIndex; startIndex <= endIndex; startIndex++) {
-            neighborCount(bottomIndex,startIndex);
+            this.count += +neighborCount(bottomIndex,startIndex);
         }
     },
-     getSides: (r,c) => {
+     getSides(r,c) {
         var leftIndex = c === 0 ? 'skip' : c-1; 
         var rightIndex = c === columns-1 ? 'skip' : c+1; 
         
         if(leftIndex !== 'skip') {
-            neighborCount(r,leftIndex);
+            this.count += +neighborCount(r,leftIndex);
         }
         if(rightIndex !== 'skip') {
-            neighborCount(r,rightIndex);
+            this.count += +neighborCount(r,rightIndex);
         }
     }
 };
@@ -91,18 +93,18 @@ let rules = {
 
 
 let neighborCount = (r, c) => {
-    if(originalState[r][c] === 1){
-        count++;
-    }
+    return originalState[r][c];
 }
 
 
 let getNeighbors = (r,c) => {
-    count = 0;
+    neighborFunctions.count = 0;
     for (var obj in neighborFunctions) {
-        neighborFunctions[obj](r,c);
+        if (typeof neighborFunctions[obj] == "function") {
+            neighborFunctions[obj](r,c);
+        }
     }
-    return count;
+    return neighborFunctions.count;
 }
 
 function gamePlay() {
