@@ -91,8 +91,10 @@ SEED STATE
   Would be same as above but keep playing until the board shows all 0
   
   ### Specify Iterations
-  `node game 6 8 true false 4'
-  NOTE play until extinct needs to be false
+  `node game 6 8 true false 4`
+  
+  #### NOTE play until extinct needs to be false
+  
   #### Output
   ```
   SEED STATE
