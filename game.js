@@ -1,11 +1,10 @@
 'use strict'
 const args = process.argv;
-let rows = 6; //check if int
+let rows = 6; 
 let columns = 8;
 let repeat = false;
 let iterations = 0;
 let playUntilDead = false;
-// let originalState;
 
 if (process.argv.length > 2) {
     let parsedRows = parseInt(args[2]);
@@ -20,7 +19,7 @@ if (process.argv.length > 2) {
     }
 }
 
-//Crockfords
+
 Array.matrix = (numrows, numcols) => {
     let arr = [];
     for (let i = 0; i < numrows; ++i) {
@@ -38,41 +37,43 @@ let getRandom = () => {
 }
 
 let neighborFunctions = {
-    count: 0,
-     getTopRow(r, c, originalState) {
-        let topIndex = r - 1;
-        let startIndex = c === 0 ? 0 : c-1;
-        let endIndex = c === columns -1 ? columns-1 : c+1; 
+     getTopRow(cellData) {
+        let topIndex = cellData.r - 1;
+        let startIndex = cellData.c === 0 ? 0 : cellData.c-1;
+        let endIndex = cellData.c === columns -1 ? columns-1 : cellData.c+1; 
 
         if(topIndex === -1){
-            return;
+            return 0;
         }
         for(startIndex; startIndex <= endIndex; startIndex++) {
-            this.count += +neighborCount(topIndex, startIndex, originalState);
+            cellData.count += neighborCount(topIndex, startIndex, cellData.originalState);
         }
+        return cellData.count;
     },
-    getBottomRow(r, c, originalState) {
-        let bottomIndex = r + 1;
-        let startIndex = c === 0 ? 0 : c-1;
-        let endIndex = c === columns-1 ? columns-1 : c+1;
+    getBottomRow(cellData) {
+        let bottomIndex = cellData.r + 1;
+        let startIndex = cellData.c === 0 ? 0 : cellData.c-1;
+        let endIndex = cellData.c === columns-1 ? columns-1 : cellData.c+1;
 
         if(bottomIndex === rows){
-            return;
+            return 0;
         }
         for(startIndex; startIndex <= endIndex; startIndex++) {
-            this.count += +neighborCount(bottomIndex, startIndex, originalState);
+            cellData.count += neighborCount(bottomIndex, startIndex, cellData.originalState);
         }
+        return cellData.count;
     },
-     getSides(r, c, originalState) {
-        var leftIndex = c === 0 ? 'skip' : c-1; 
-        var rightIndex = c === columns-1 ? 'skip' : c+1; 
+     getSides(cellData) {
+        var leftIndex = cellData.c === 0 ? 'skip' : cellData.c-1; 
+        var rightIndex = cellData.c === columns-1 ? 'skip' : cellData.c+1; 
         
         if(leftIndex !== 'skip') {
-            this.count += +neighborCount(r, leftIndex, originalState);
+            cellData.count += neighborCount(cellData.r, leftIndex, cellData.originalState);
         }
         if(rightIndex !== 'skip') {
-            this.count += +neighborCount(r, rightIndex, originalState);
+            cellData.count += neighborCount(cellData.r, rightIndex, cellData.originalState);
         }
+        return cellData.count;
     }
 };
 
@@ -91,14 +92,15 @@ let neighborCount = (r, c, originalState) => {
 }
 
 
-let getNeighbors = (r, c, originalState) => {
-    neighborFunctions.count = 0;
+let getNeighbors = (cellData) => {
     for (var obj in neighborFunctions) {
         if (typeof neighborFunctions[obj] == "function") {
-            neighborFunctions[obj](r, c, originalState);
+            // neighborFunctions[obj](this.r, this.c, this.originalState);
+            neighborFunctions[obj](cellData);
+            // let x = neighborFunctions.getBottomRow.bind(this);
         }
     }
-    return neighborFunctions.count;
+    return cellData.count;
 }
 
 function gamePlay(originalState) {
@@ -106,13 +108,17 @@ function gamePlay(originalState) {
     let deadYet = 0;
     let newCell;
     let newGrid = [];
-
-    // console.log(originalState); 
-    
     
     for(let i = 0; i <= originalState.length - 1; i++) {
        let newRow = originalState[i].map((x, index)=>{
-            liveNeighborsForCurrentCell = getNeighbors(i, index, originalState);
+           let cellData = {
+               r : i,
+               c : index,
+               count: 0,
+               originalState : originalState
+           }
+           liveNeighborsForCurrentCell = getNeighbors(cellData);
+            // liveNeighborsForCurrentCell = getNeighbors(i, index, originalState);
             if(x) {
                 newCell = +rules.rulesForLiveCells(liveNeighborsForCurrentCell);
                 if(newCell) {
@@ -153,6 +159,8 @@ function gamePlay(originalState) {
 //   [ 0, 0, 1, 0, 0, 0, 1, 0 ],
 //   [ 0, 1, 0, 0, 0, 1, 1, 0 ] ]
 console.log('SEED STATE');
+// neighborFunctions.getBottomRow(1,1,originalState)
+// console.log(neighborFunctions.count);
 console.log(originalState);
 console.log('\n'); 
 if(repeat) {
