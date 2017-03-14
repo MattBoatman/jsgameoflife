@@ -22,7 +22,7 @@ From here you can start adding parameters:
 
 `node game 6 8`
 
-####Output
+#### Output
 ```
 SEED STATE
 [ [ 1, 1, 0, 1, 0, 0, 1, 0 ],
@@ -45,7 +45,7 @@ SEED STATE
   
 `node game 6 8 true`
 
-####Output
+#### Output
 ```
 node game 6 8 true
 SEED STATE
@@ -87,7 +87,7 @@ SEED STATE
   ### Play Until Extinct
   `node game 6 8 true true`
   
-  ####Output 
+  #### Output 
   Would be same as above but keep playing until the board shows all 0
   
   ### Specify Iterations
