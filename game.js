@@ -55,9 +55,9 @@ var Game = {
     },
      getSides(cellData) {
         let leftIndex = cellData.c === 0 ? 'skip' : cellData.c-1; 
-        let rightIndex = cellData.c === columns-1 ? 'skip' : cellData.c+1; 
+        let rightIndex = cellData.c === cellData.originalState[0].length-1 ? 'skip' : cellData.c+1; 
         let count = 0;
-        
+
         if(leftIndex !== 'skip') {
             count += Game.returnCellValue(cellData.r, leftIndex, cellData.originalState);
         }
@@ -103,8 +103,8 @@ gamePlay(originalState) {
     
     for(let i = 0; i <= originalState.length - 1; i++) {
        let newRow = originalState[i].map((x, index)=>{
-            let startIndex = index === 0 ? 0 : index-1;
-            let endIndex = index === columns-1 ? columns-1 : index+1;
+            let startIndex = Math.max(0, index-1);
+            let endIndex = Math.min(originalState[i].length-1, index+1);
             let cellData = {
                r : i,
                c : index,
