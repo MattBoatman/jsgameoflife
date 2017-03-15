@@ -138,7 +138,7 @@ SEED STATE
   [ 0, 0, 0, 0, 0, 0, 0, 0 ] ]
   ```
 
-#Testing
+# Testing
 `npm install` should install any dependencies needed
 Running `jasmine` will run the tests
 
