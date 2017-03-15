@@ -1,0 +1,22 @@
+{
+  "name": "jsgameoflife",
+  "version": "1.0.0",
+  "description": "Conways Game of Life",
+  "main": "game.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@github.com/boatrr/jsgameoflife.git"
+  },
+  "author": "Matt Boatman",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/boatrr/jsgameoflife/issues"
+  },
+  "homepage": "https://github.com/boatrr/jsgameoflife#readme",
+  "devDependencies": {
+    "jasmine": "^2.5.3"
+  }
+}

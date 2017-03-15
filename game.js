@@ -6,7 +6,7 @@ let repeat = false;
 let iterations = 0;
 let playUntilDead = false;
 
-if (process.argv.length > 2) {
+if (args.length > 2) {
     let parsedRows = parseInt(args[2]);
     let parsedColumns = parseInt(args[3]);
     rows = parsedRows ? parsedRows : 6;
@@ -25,109 +25,103 @@ Array.matrix = (numrows, numcols) => {
     for (let i = 0; i < numrows; ++i) {
         let columns = [];
         for (let j = 0; j < numcols; ++j) {
-            columns[j] = getRandom();
+            columns[j] = Math.round(Math.random());
         }
         arr[i] = columns;
     }
     return arr;
 };
-
-let getRandom = () => {
-  return Math.round(Math.random());
-}
-
-let neighborFunctions = {
+let originalState = Array.matrix(rows,columns);
+console.log('SEED STATE');
+console.log(originalState);
+console.log('\n'); 
+var Game = {
+ neighborFunctions : {
      getTopRow(cellData) {
         let topIndex = cellData.r - 1;
-        let startIndex = cellData.c === 0 ? 0 : cellData.c-1;
-        let endIndex = cellData.c === columns -1 ? columns-1 : cellData.c+1; 
 
         if(topIndex === -1){
             return 0;
-        }
-        for(startIndex; startIndex <= endIndex; startIndex++) {
-            cellData.count += neighborCount(topIndex, startIndex, cellData.originalState);
-        }
-        return cellData.count;
+        } 
+        return Game.getLiveCellCount(topIndex, cellData.startIndex, cellData.endIndex, cellData.originalState);
     },
     getBottomRow(cellData) {
         let bottomIndex = cellData.r + 1;
-        let startIndex = cellData.c === 0 ? 0 : cellData.c-1;
-        let endIndex = cellData.c === columns-1 ? columns-1 : cellData.c+1;
 
         if(bottomIndex === rows){
             return 0;
         }
-        for(startIndex; startIndex <= endIndex; startIndex++) {
-            cellData.count += neighborCount(bottomIndex, startIndex, cellData.originalState);
-        }
-        return cellData.count;
+        return Game.getLiveCellCount(bottomIndex, cellData.startIndex, cellData.endIndex, cellData.originalState);
     },
      getSides(cellData) {
-        var leftIndex = cellData.c === 0 ? 'skip' : cellData.c-1; 
-        var rightIndex = cellData.c === columns-1 ? 'skip' : cellData.c+1; 
+        let leftIndex = cellData.c === 0 ? 'skip' : cellData.c-1; 
+        let rightIndex = cellData.c === columns-1 ? 'skip' : cellData.c+1; 
+        let count = 0;
         
         if(leftIndex !== 'skip') {
-            cellData.count += neighborCount(cellData.r, leftIndex, cellData.originalState);
+            count += Game.returnCellValue(cellData.r, leftIndex, cellData.originalState);
         }
         if(rightIndex !== 'skip') {
-            cellData.count += neighborCount(cellData.r, rightIndex, cellData.originalState);
+            count += Game.returnCellValue(cellData.r, rightIndex, cellData.originalState);
         }
-        return cellData.count;
+        return count;
     }
-};
+},
 
-let rules = {
-    rulesForLiveCells: (liveNeighbors) => {
-        return(2 === liveNeighbors || liveNeighbors === 3);
-    },   
-    rulesForDeadCells: (liveNeighbors) => {
-        return liveNeighbors === 3;
-    }
-}
+ getLiveCellCount(rowIndex, startIndex, endIndex, grid) {
+   let newArray = grid[rowIndex].slice(startIndex, endIndex+1)
+    let numOfLiveCells = newArray.reduce((acc, val) => {
+        return acc + val;
+    }, 0);
+    return numOfLiveCells;
+},
 
 
-let neighborCount = (r, c, originalState) => {
+ rulesForLiveCells(liveNeighbors) {
+    return(liveNeighbors === 2 || liveNeighbors === 3);
+},  
+rulesForDeadCells(liveNeighbors) {
+    return liveNeighbors === 3;
+},
+ returnCellValue(r, c, originalState){
     return originalState[r][c];
-}
-
-
-let getNeighbors = (cellData) => {
-    for (var obj in neighborFunctions) {
-        if (typeof neighborFunctions[obj] == "function") {
-            // neighborFunctions[obj](this.r, this.c, this.originalState);
-            neighborFunctions[obj](cellData);
-            // let x = neighborFunctions.getBottomRow.bind(this);
+},
+getNeighbors(cellData){
+    let count = 0;
+    
+    for (var obj in Game.neighborFunctions) {
+        if (typeof Game.neighborFunctions[obj] == "function") {
+            count += Game.neighborFunctions[obj](cellData);
         }
     }
-    return cellData.count;
-}
-
-function gamePlay(originalState) {
-    let liveNeighborsForCurrentCell;
+    return count;
+},
+gamePlay(originalState) {
     let deadYet = 0;
     let newCell;
     let newGrid = [];
     
     for(let i = 0; i <= originalState.length - 1; i++) {
        let newRow = originalState[i].map((x, index)=>{
-           let cellData = {
+            let startIndex = index === 0 ? 0 : index-1;
+            let endIndex = index === columns-1 ? columns-1 : index+1;
+            let cellData = {
                r : i,
                c : index,
-               count: 0,
+               startIndex: startIndex,
+               endIndex : endIndex,
                originalState : originalState
-           }
-           liveNeighborsForCurrentCell = getNeighbors(cellData);
-            // liveNeighborsForCurrentCell = getNeighbors(i, index, originalState);
+            }
+            let liveNeighborsForCurrentCell = Game.getNeighbors(cellData);
             if(x) {
-                newCell = +rules.rulesForLiveCells(liveNeighborsForCurrentCell);
-                if(newCell) {
+                newCell = +Game.rulesForLiveCells(liveNeighborsForCurrentCell);
+                if(newCell && playUntilDead) {
                     deadYet++;
                 }
                 return newCell;
             } else {
-                newCell = +rules.rulesForDeadCells(liveNeighborsForCurrentCell)
-                if(newCell) {
+                newCell = +Game.rulesForDeadCells(liveNeighborsForCurrentCell)
+                if(newCell && playUntilDead) {
                     deadYet++;
                 }
                 return newCell;
@@ -139,41 +133,24 @@ function gamePlay(originalState) {
     console.log(newGrid)
     console.log('\n'); 
 
-    if(deadYet === 0){
+    if(deadYet === 0 && playUntilDead){
         repeat = false;
     }
     return newGrid;
 }
-    let originalState = Array.matrix(rows,columns);
-//    let originalState = [ [ 1, 0, 0, 0, 0, 0, 1, 1 ],
-//   [ 1, 1, 0, 1, 0, 0, 1, 0 ],
-//   [ 1, 1, 0, 1, 1, 0, 0, 0 ],
-//   [ 1, 1, 0, 1, 1, 1, 0, 0 ],
-//   [ 0, 0, 1, 0, 1, 0, 1, 0 ],
-//   [ 1, 1, 0, 0, 0, 1, 1, 0 ] ]
-// let expectedOut = 
-// [ [ 1, 1, 0, 0, 0, 0, 1, 1 ],
-//   [ 0, 0, 0, 1, 1, 1, 1, 1 ],
-//   [ 0, 0, 0, 0, 0, 0, 0, 0 ],
-//   [ 1, 0, 0, 0, 0, 0, 0, 0 ],
-//   [ 0, 0, 1, 0, 0, 0, 1, 0 ],
-//   [ 0, 1, 0, 0, 0, 1, 1, 0 ] ]
-console.log('SEED STATE');
-// neighborFunctions.getBottomRow(1,1,originalState)
-// console.log(neighborFunctions.count);
-console.log(originalState);
-console.log('\n'); 
+};
 if(repeat) {
     if(!iterations || playUntilDead) {
         while(repeat) {
-            originalState = gamePlay(originalState)
-            gamePlay(originalState);
+            originalState = Game.gamePlay(originalState)
+            Game.gamePlay(originalState);
         }
     }
     for(let x = 0; x < iterations; x++) {
-        originalState = gamePlay(originalState)
+        originalState = Game.gamePlay(originalState)
     }
 } else {
-    gamePlay(originalState);
+    Game.gamePlay(originalState);
 }
 
+module.exports = Game;
