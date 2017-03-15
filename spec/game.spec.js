@@ -126,7 +126,7 @@ describe("Game", function() {
       describe('getSides', function(){
           var grid;
           beforeEach(function(){
-            grid = [ [ 1, 0, 0, 0, 0, 0, 1, 1 ],
+            grid =    [ [ 1, 0, 0, 0, 0, 0, 1, 1 ],
                         [ 1, 1, 0, 1, 0, 0, 1, 0 ],
                         [ 1, 1, 0, 1, 1, 0, 0, 0 ],
                         [ 1, 1, 0, 1, 1, 1, 0, 0 ],
@@ -183,6 +183,34 @@ describe("Game", function() {
   describe('gamePlay', function(){
       it('Expect output of one tick to equal expected output', function(){
           expect(game.gamePlay(grid)).toEqual(expectedGrid);
+      });
+      it('check the input of getNeighbors from gamePlay', function(){
+          spyOn(game, "getNeighbors");
+          var expectedCall = {
+               r : 0,
+               c : 0,
+               startIndex: 0,
+               endIndex : 1,
+               originalState : grid
+            };
+           var expectedCall1 = {
+               r : 1,
+               c : 1,
+               startIndex: 0,
+               endIndex : 2,
+               originalState : grid
+            };
+           var expectedCall2 = {
+               r : 1,
+               c : 7,
+               startIndex: 6,
+               endIndex : 7,
+               originalState : grid
+            };
+            game.gamePlay(grid);
+            expect(game.getNeighbors).toHaveBeenCalledWith(expectedCall);
+            expect(game.getNeighbors).toHaveBeenCalledWith(expectedCall1);
+            expect(game.getNeighbors).toHaveBeenCalledWith(expectedCall2);
       });
   });
 });
