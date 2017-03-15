@@ -140,6 +140,7 @@ SEED STATE
 
 # Testing
 `npm install` should install any dependencies needed
-Running `jasmine` will run the tests
+
+Running `npm test` or `jasmine` will run the tests
 
 `npm install -g jasmine`  if you get CLI errors running the tests
