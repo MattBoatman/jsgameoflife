@@ -137,3 +137,9 @@ SEED STATE
   [ 0, 0, 0, 0, 0, 1, 0, 0 ],
   [ 0, 0, 0, 0, 0, 0, 0, 0 ] ]
   ```
+
+#Testing
+`npm install` should install any dependencies needed
+Running `jasmine` will run the tests
+
+`npm install -g jasmine`  if you get CLI errors running the tests
